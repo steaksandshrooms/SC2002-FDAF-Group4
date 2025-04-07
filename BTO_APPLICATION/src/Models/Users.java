@@ -10,6 +10,7 @@ public class Users {
 	
 
 	private String userid ;
+	private String name ;
 	private String password;
 	private int Age;
 	private MaritalStatus maritalStatus;
@@ -20,9 +21,10 @@ public class Users {
 	
 	//User:constructor
 	
-	public Users(String userid, int age, MaritalStatus mstatus, Role role )
+	public Users(String userid, String name ,int age, MaritalStatus mstatus, Role role )
 	{
 		   this.userid = userid;
+		   this.name  = name;
 		   this.Age =  age;
 		   this.maritalStatus = mstatus;
 		   this.role = role;
@@ -89,6 +91,16 @@ public class Users {
 	public void setRole(Role r)
 	{
 		this.role = r;
+	}
+	
+	public String getName()
+	{
+		return this.name;
+	}
+	
+	public void setName(String newname)
+	{
+		 this.name = newname;
 	}
    
 

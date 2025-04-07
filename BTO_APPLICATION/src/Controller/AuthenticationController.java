@@ -27,7 +27,7 @@ public class AuthenticationController {
 	}
 	
 	// Registration - Add user to the database
-	public boolean Register(String userid, int age, MaritalStatus mstatus, Role role) {
+	public boolean Register(String userid, String name ,int age, MaritalStatus mstatus, Role role) {
 		// Check if the user already exists
 		if (Exist(userid)) {
 			System.out.println("User has already registered, please sign in.");
@@ -41,7 +41,7 @@ public class AuthenticationController {
 		}
 
 		// Create a new user and add to database
-		Users newUser = new Users(userid, age, mstatus, role);
+		Users newUser = new Users(userid, name , age, mstatus, role);
 		Database.UserDB.put(userid, newUser);
 	
 		return true;

@@ -22,6 +22,11 @@ public class AuthenticationView {
                 System.out.println("Invalid user ID pattern. Please enter a valid user ID.");
             }
         }
+        
+        //Enter your name 
+        
+        System.out.println("Enter your name : ");
+        String name  = s.nextLine();
 
         int maritalChoice;
         MaritalStatus mstatus = null;
@@ -80,7 +85,7 @@ public class AuthenticationView {
             break;
         }
 
-        boolean registerSuccess = authController.Register(userid, age, mstatus, role);
+        boolean registerSuccess = authController.Register(userid, name ,age, mstatus, role);
 
         if (registerSuccess) {
             System.out.println("Successfully Registered");
