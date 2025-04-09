@@ -1,11 +1,13 @@
 package Views;
-
+import Models.*;
 import java.util.Scanner;
 import Models.Role;
 import Models.MaritalStatus;
 import Controller.AuthenticationController;
+import Database.Database;
 
 public class AuthenticationView {
+	Database db  = new Database();
 
     Scanner s = new Scanner(System.in);
     private AuthenticationController authController = new AuthenticationController();
@@ -123,12 +125,14 @@ public class AuthenticationView {
             // Directly redirect to the role's view
             switch (userRole) {
                 case Applicant:
-                    ApplicantView applicant = new ApplicantView();
-                    applicant.ApplicantStart(); 
+                	Applicant applicant = db.ApplicantDB.get(userid);
+                    ApplicantView A = new ApplicantView();
+                    A.ApplicantStart(applicant);  
                     break;
                 case HDBOfficer:
+                    HDBOfficer officer = db.OfficerDB.get(userid);
                     HDBOfficerView officerView = new HDBOfficerView();
-                    officerView.HDBOfficerStart(); 
+                    officerView.OfficerStart(officer); 
                     break;
                 case HDBManager:
                     HDBManagerView managerView = new HDBManagerView();

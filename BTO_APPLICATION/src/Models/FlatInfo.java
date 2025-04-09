@@ -57,6 +57,8 @@ public class FlatInfo {
        this.Nounits = units;
     }
     
+  
+    
     public void getinfo()
     {
     	System.out.println("*******************************");
