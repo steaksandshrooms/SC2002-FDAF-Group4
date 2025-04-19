@@ -1,6 +1,9 @@
 import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 class BTOSystemCore {
     private Map<String, User> users;
@@ -15,7 +18,7 @@ class BTOSystemCore {
     }
 
     private void initializeSampleData() {
-        // Create sample users
+        // Create sample users with hashed passwords
         users.put("S1234567A", new Applicant("John", "S1234567A", 35, "Single", "password"));
         users.put("T7654321B", new Applicant("Sarah", "T7654321B", 40, "Married", "password"));
 
@@ -42,10 +45,17 @@ class BTOSystemCore {
         projects.add(project);
         manager.addManagedProject(project);
 
+        // Set up pending officers for demonstration
+        pendingOfficers.put(project, new ArrayList<>());
+        pendingOfficers.get(project).add((HDBOfficer) users.get("S6543210I"));
+
         // Assign officer to project
         HDBOfficer officer = (HDBOfficer) users.get("T2109876H");
         project.addOfficer(officer);
         officer.setAssignedProject(project);
+        
+        // Make the project visible
+        project.setVisibility(true);
     }
 
     public User login(String nric, String password) {
@@ -60,21 +70,46 @@ class BTOSystemCore {
         return null;
     }
 
-    public User getUser(String nric) {
-        return users.get(nric);
-    }
-
     private boolean validateNRIC(String nric) {
         return nric.matches("[ST]\\d{7}[A-Z]");
+    }
+
+    public User getUser(String nric) {
+        return users.get(nric);
     }
 
     public List<BTOProject> getVisibleProjects(User user) {
         List<BTOProject> visible = new ArrayList<>();
 
         for (BTOProject project : projects) {
-            if (project.isVisible() ||
-                    (user instanceof HDBStaff && ((HDBStaff)user).canViewProject(project))) {
+            // HDB Staff can see projects based on their role
+            if (user instanceof HDBStaff && ((HDBStaff)user).canViewProject(project)) {
                 visible.add(project);
+                continue;
+            }
+            
+            // For regular applicants
+            if (project.isVisible()) {
+                // Add age and marital status filtering as per requirement 5
+                boolean eligible = true;
+                
+                // Rule: Singles under 35 can only see projects with 2-Room flats
+                if (user.getMaritalStatus().equals("Single") && user.getAge() < 35) {
+                    boolean has2RoomFlats = project.getFlatTypes().contains("2-Room") && 
+                                            project.getAvailableUnits("2-Room") > 0;
+                    if (!has2RoomFlats) {
+                        eligible = false;
+                    }
+                }
+                
+                // Check age requirement for all users
+                if (user.getAge() < 21) {
+                    eligible = false;
+                }
+                
+                if (eligible) {
+                    visible.add(project);
+                }
             }
         }
 
@@ -89,6 +124,22 @@ class BTOSystemCore {
         projects.add(project);
     }
 
+    public void addPendingOfficerForProject(HDBOfficer officer, BTOProject project) {
+        // Initialize list if needed
+        pendingOfficers.putIfAbsent(project, new ArrayList<>());
+        
+        // Check if officer has applied for this project
+        if (officer.getCurrentApplication() != null && 
+            officer.getCurrentApplication().getProject().equals(project)) {
+            System.out.println("Cannot register to handle a project you've applied for!");
+            return;
+        }
+        
+        // Add to pending list
+        pendingOfficers.get(project).add(officer);
+        System.out.println("Registration submitted for approval.");
+    }
+
     public List<HDBOfficer> getPendingOfficersForProject(BTOProject project) {
         return pendingOfficers.getOrDefault(project, new ArrayList<>());
     }
@@ -98,104 +149,5 @@ class BTOSystemCore {
         if (officers != null) {
             officers.remove(officer);
         }
-    }
-}
-
-abstract class User {
-    protected String name;
-    protected String nric;
-    protected int age;
-    protected String maritalStatus;
-    protected String password;
-
-    public User(String name, String nric, int age, String maritalStatus, String password) {
-        this.name = name;
-        this.nric = nric;
-        this.age = age;
-        this.maritalStatus = maritalStatus;
-        this.password = password;
-    }
-
-    public boolean authenticate(String password) {
-        return this.password.equals(password);
-    }
-
-    public void changePassword(String newPassword) {
-        this.password = newPassword;
-    }
-
-    public String getName() { return name; }
-    public String getNric() { return nric; }
-    public int getAge() { return age; }
-    public String getMaritalStatus() { return maritalStatus; }
-
-    public abstract String getRole();
-}
-
-class Applicant extends User {
-    private Application currentApplication;
-    private List<Enquiry> enquiries;
-    private FlatBooking flatBooking;
-
-    public Applicant(String name, String nric, int age, String maritalStatus, String password) {
-        super(name, nric, age, maritalStatus, password);
-        this.enquiries = new ArrayList<>();
-    }
-
-    @Override
-    public String getRole() {
-        return "Applicant";
-    }
-
-    public void applyForProject(BTOProject project, String flatType) {
-        if (currentApplication != null && !currentApplication.getStatus().equals("Unsuccessful")) {
-            System.out.println("You already have an active application!");
-            return;
-        }
-
-        // Check eligibility
-        if (maritalStatus.equals("Single") && age < 35 && !flatType.equals("2-Room")) {
-            System.out.println("As a single under 35, you can only apply for 2-Room flats.");
-            return;
-        }
-
-        if (maritalStatus.equals("Single") && age < 21) {
-            System.out.println("You must be at least 21 years old to apply.");
-            return;
-        }
-
-        if (maritalStatus.equals("Married") && age < 21) {
-            System.out.println("You must be at least 21 years old to apply.");
-            return;
-        }
-
-        // Check if flat type is available
-        if (!project.hasAvailableUnits(flatType)) {
-            System.out.println("No available units of this type.");
-            return;
-        }
-
-        currentApplication = new Application(this, project, flatType);
-        project.addApplication(currentApplication);
-        System.out.println("Application submitted successfully!");
-    }
-
-    public Application getCurrentApplication() {
-        return currentApplication;
-    }
-
-    public void submitEnquiry(BTOProject project, String message) {
-        Enquiry enquiry = new Enquiry(this, project, message);
-        enquiries.add(enquiry);
-        project.addEnquiry(enquiry);
-        System.out.println("Enquiry submitted successfully!");
-    }
-
-    public List<Enquiry> getEnquiries() {
-        return new ArrayList<>(enquiries);
-    }
-
-    public void setFlatBooking(FlatBooking flatBooking) {
-        this.flatBooking = flatBooking;
     }
 }
