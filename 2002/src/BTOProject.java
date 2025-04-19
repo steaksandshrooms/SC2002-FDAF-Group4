@@ -95,9 +95,3 @@ class BTOProject {
     public LocalDate getCloseDate() { return closeDate; }
     public boolean isVisible() { return visible; }
 }
-
-public class BTOSystem {
-    public static void main(String[] args) {
-        new BTOConsole().start();
-    }
-}
