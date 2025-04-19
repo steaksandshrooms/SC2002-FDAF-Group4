@@ -1,6 +1,9 @@
 import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 class BTOProject {
     private String name;
@@ -91,4 +94,10 @@ class BTOProject {
     public LocalDate getOpenDate() { return openDate; }
     public LocalDate getCloseDate() { return closeDate; }
     public boolean isVisible() { return visible; }
+}
+
+public class BTOSystem {
+    public static void main(String[] args) {
+        new BTOConsole().start();
+    }
 }
