@@ -2,10 +2,6 @@ import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import java.util.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 class BTOConsole {
     private BTOSystemCore system;
     private Scanner scanner;
