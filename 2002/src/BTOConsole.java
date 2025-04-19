@@ -1,6 +1,9 @@
 import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 class BTOConsole {
     private BTOSystemCore system;
@@ -64,18 +67,18 @@ class BTOConsole {
         System.out.println("3. Submit Enquiry");
         System.out.println("4. View My Enquiries");
         System.out.println("5. Change Password");
-
+    
         if (currentUser instanceof HDBOfficer) {
             System.out.println("6. Officer Functions");
         } else if (currentUser instanceof HDBManager) {
             System.out.println("6. Manager Functions");
         }
-
+    
         System.out.println("0. Logout");
         System.out.print("Choose an option: ");
-
+    
         int choice = getIntInput(0, currentUser instanceof HDBStaff ? 6 : 5);
-
+    
         switch (choice) {
             case 1:
                 viewProjects();
@@ -108,12 +111,12 @@ class BTOConsole {
 
     private void viewProjects() {
         List<BTOProject> projects = system.getVisibleProjects(currentUser);
-
+    
         if (projects.isEmpty()) {
             System.out.println("\nNo projects available.");
             return;
         }
-
+    
         System.out.println("\n=== Available Projects ===");
         for (int i = 0; i < projects.size(); i++) {
             BTOProject p = projects.get(i);
@@ -121,13 +124,23 @@ class BTOConsole {
                     i+1, p.getName(), p.getNeighborhood(),
                     p.getOpenDate(), p.getCloseDate());
         }
-
-        if (currentUser instanceof Applicant) {
+    
+        // Allow both Applicants and HDBOfficers to apply for projects
+        if (currentUser instanceof Applicant || currentUser instanceof HDBOfficer) {
             System.out.print("\nEnter project number to apply (0 to go back): ");
             int choice = getIntInput(0, projects.size());
-
+    
             if (choice > 0) {
                 BTOProject selected = projects.get(choice-1);
+                
+                // Check if HDBOfficer is trying to apply for a project they're handling
+                if (currentUser instanceof HDBOfficer && 
+                    ((HDBOfficer)currentUser).getAssignedProject() != null &&
+                    ((HDBOfficer)currentUser).getAssignedProject().equals(selected)) {
+                    System.out.println("You cannot apply for a project you're handling!");
+                    return;
+                }
+                
                 applyForProject(selected);
             }
         }
@@ -138,67 +151,77 @@ class BTOConsole {
         for (String type : project.getFlatTypes()) {
             System.out.println("- " + type + " (" + project.getAvailableUnits(type) + " available)");
         }
-
+    
         System.out.print("Enter flat type to apply for: ");
         String flatType = scanner.nextLine();
-
+    
         if (currentUser instanceof Applicant) {
             ((Applicant)currentUser).applyForProject(project, flatType);
+        } else if (currentUser instanceof HDBOfficer) {
+            ((HDBOfficer)currentUser).applyForProject(project, flatType);
         }
     }
 
     private void viewApplication() {
+        Application app = null;
+        
         if (currentUser instanceof Applicant) {
-            Application app = ((Applicant)currentUser).getCurrentApplication();
-            if (app != null) {
-                System.out.println("\n=== Your Application ===");
-                System.out.println(app);
-            } else {
-                System.out.println("\nYou don't have any active applications.");
-            }
+            app = ((Applicant)currentUser).getCurrentApplication();
+        } else if (currentUser instanceof HDBOfficer) {
+            app = ((HDBOfficer)currentUser).getCurrentApplication();
+        }
+        
+        if (app != null) {
+            System.out.println("\n=== Your Application ===");
+            System.out.println(app);
         } else {
-            System.out.println("\nOnly applicants can view applications.");
+            System.out.println("\nYou don't have any active applications.");
         }
     }
 
     private void submitEnquiry() {
         List<BTOProject> projects = system.getAllProjects();
-
+    
         System.out.println("\n=== Select Project for Enquiry ===");
         for (int i = 0; i < projects.size(); i++) {
             System.out.printf("%d. %s\n", i+1, projects.get(i).getName());
         }
-
+    
         System.out.print("Enter project number (0 to cancel): ");
         int choice = getIntInput(0, projects.size());
-
+    
         if (choice > 0) {
             BTOProject project = projects.get(choice-1);
             System.out.print("Enter your enquiry: ");
             String message = scanner.nextLine();
-
+    
             if (currentUser instanceof Applicant) {
                 ((Applicant)currentUser).submitEnquiry(project, message);
+            } else if (currentUser instanceof HDBOfficer) {
+                ((HDBOfficer)currentUser).submitEnquiry(project, message);
             }
         }
     }
 
     private void viewEnquiries() {
+        List<Enquiry> enquiries = null;
+        
         if (currentUser instanceof Applicant) {
-            List<Enquiry> enquiries = ((Applicant)currentUser).getEnquiries();
-            if (enquiries.isEmpty()) {
-                System.out.println("\nYou haven't submitted any enquiries.");
-            } else {
-                System.out.println("\n=== Your Enquiries ===");
-                for (Enquiry e : enquiries) {
-                    System.out.println(e);
-                    if (e.getReply() != null) {
-                        System.out.println("  Reply: " + e.getReply());
-                    }
+            enquiries = ((Applicant)currentUser).getEnquiries();
+        } else if (currentUser instanceof HDBOfficer) {
+            enquiries = ((HDBOfficer)currentUser).getEnquiries();
+        }
+        
+        if (enquiries == null || enquiries.isEmpty()) {
+            System.out.println("\nYou haven't submitted any enquiries.");
+        } else {
+            System.out.println("\n=== Your Enquiries ===");
+            for (Enquiry e : enquiries) {
+                System.out.println(e);
+                if (e.getReply() != null) {
+                    System.out.println("  Reply: " + e.getReply());
                 }
             }
-        } else {
-            System.out.println("\nOnly applicants can view their enquiries.");
         }
     }
 
@@ -225,11 +248,12 @@ class BTOConsole {
         System.out.println("3. Process Flat Booking");
         System.out.println("4. View Project Enquiries");
         System.out.println("5. Reply to Enquiry");
+        System.out.println("6. Register to Handle Project"); // New option
         System.out.println("0. Back");
         System.out.print("Choose an option: ");
-
-        int choice = getIntInput(0, 5);
-
+    
+        int choice = getIntInput(0, 6);
+    
         switch (choice) {
             case 1:
                 viewAssignedProject();
@@ -245,6 +269,9 @@ class BTOConsole {
                 break;
             case 5:
                 replyToEnquiry();
+                break;
+            case 6:
+                registerForProject();
                 break;
             case 0:
                 break;
@@ -297,46 +324,112 @@ class BTOConsole {
                 System.out.println("\nYou are not assigned to any project.");
                 return;
             }
-
+    
             System.out.print("\nEnter applicant NRIC: ");
             String nric = scanner.nextLine().trim().toUpperCase();
             User user = system.getUser(nric);
-
-            if (user == null || !(user instanceof Applicant)) {
-                System.out.println("Applicant not found.");
+    
+            if (user == null) {
+                System.out.println("User not found.");
                 return;
             }
-
-            Applicant applicant = (Applicant)user;
-            Application app = applicant.getCurrentApplication();
-
+    
+            Application app = null;
+            if (user instanceof Applicant) {
+                app = ((Applicant)user).getCurrentApplication();
+            } else if (user instanceof HDBOfficer) {
+                app = ((HDBOfficer)user).getCurrentApplication();
+            }
+    
             if (app == null || !app.getProject().equals(project)) {
-                System.out.println("Applicant has no active application for this project.");
+                System.out.println("User has no active application for this project.");
                 return;
             }
-
+    
             if (!app.getStatus().equals("Successful")) {
                 System.out.println("Application is not in 'Successful' status.");
                 return;
             }
-
+    
             System.out.println("Available flat types:");
             for (String type : project.getFlatTypes()) {
                 System.out.println("- " + type + " (" + project.getAvailableUnits(type) + " available)");
             }
-
+    
             System.out.print("Enter flat type to book: ");
             String flatType = scanner.nextLine();
-
+    
             if (!project.hasAvailableUnits(flatType)) {
                 System.out.println("No available units of this type.");
                 return;
             }
-
+    
             project.bookFlat(flatType);
             app.setStatus("Booked");
-            applicant.setFlatBooking(new FlatBooking(applicant, project, flatType));
-            System.out.println("Flat booked successfully for " + applicant.getName());
+            
+            FlatBooking booking = new FlatBooking(user, project, flatType);
+            
+            if (user instanceof Applicant) {
+                ((Applicant)user).setFlatBooking(booking);
+            } else if (user instanceof HDBOfficer) {
+                ((HDBOfficer)user).setFlatBooking(booking);
+            }
+            
+            System.out.println("Flat booked successfully for " + user.getName());
+        }
+    }
+
+    private void registerForProject() {
+        if (currentUser instanceof HDBOfficer) {
+            HDBOfficer officer = (HDBOfficer) currentUser;
+            
+            // Check if officer is already assigned to a project
+            if (officer.getAssignedProject() != null) {
+                System.out.println("\nYou are already assigned to a project. You must complete your current assignment first.");
+                return;
+            }
+            
+            // Get projects without applied project
+            List<BTOProject> availableProjects = new ArrayList<>();
+            for (BTOProject project : system.getAllProjects()) {
+                // Skip project officer has applied for
+                if (officer.getCurrentApplication() != null && 
+                    officer.getCurrentApplication().getProject().equals(project)) {
+                    continue;
+                }
+                availableProjects.add(project);
+            }
+            
+            if (availableProjects.isEmpty()) {
+                System.out.println("\nNo projects available for registration.");
+                return;
+            }
+            
+            System.out.println("\n=== Available Projects for Registration ===");
+            for (int i = 0; i < availableProjects.size(); i++) {
+                BTOProject p = availableProjects.get(i);
+                int currentOfficers = p.getOfficers().size();
+                int maxOfficers = p.getOfficerSlots();
+                
+                System.out.printf("%d. %s (%s) - %d/%d officers\n",
+                        i+1, p.getName(), p.getNeighborhood(), 
+                        currentOfficers, maxOfficers);
+            }
+            
+            System.out.print("\nEnter project number to register (0 to go back): ");
+            int choice = getIntInput(0, availableProjects.size());
+            
+            if (choice > 0) {
+                BTOProject selected = availableProjects.get(choice-1);
+                
+                // Check if the project has open slots
+                if (selected.getOfficers().size() >= selected.getOfficerSlots()) {
+                    System.out.println("This project already has the maximum number of officers.");
+                    return;
+                }
+                
+                system.addPendingOfficerForProject(officer, selected);
+            }
         }
     }
 
