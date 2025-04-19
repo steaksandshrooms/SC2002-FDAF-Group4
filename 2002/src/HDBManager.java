@@ -1,6 +1,9 @@
 import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 class HDBManager extends HDBStaff {
     private List<BTOProject> managedProjects;
