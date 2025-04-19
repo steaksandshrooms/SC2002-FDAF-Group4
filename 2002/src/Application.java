@@ -1,9 +1,12 @@
 import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 class Application {
-    private User applicant;
+    private User applicant; // Changed from Applicant to User
     private BTOProject project;
     private String flatType;
     private String status;
@@ -21,7 +24,7 @@ class Application {
     public void setStatus(String status) { this.status = status; }
     public BTOProject getProject() { return project; }
     public String getFlatType() { return flatType; }
-    public User getApplicant() { return applicant; }
+    public User getApplicant() { return applicant; } // Changed return type to User
 
     @Override
     public String toString() {
