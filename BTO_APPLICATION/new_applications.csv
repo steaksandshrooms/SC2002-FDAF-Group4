@@ -1,4 +1,0 @@
-ApplicationId,ApplicantName,UserID,Age,MaritalStatus,Role,ProjectName,FlatType,SellingPrice,NoOfUnits,BookedDate,Status
-b3e178d7,John,S1234567A,35,SINGLE,Applicant,Acacia Breeze,1,350000.0,2,15/2/2025,PENDING
-c147ec03,John,S1234567A,35,SINGLE,Applicant,Acacia Breeze,1,350000.0,2,15/2/2025,PENDING
-5c71fe67,John,S1234567A,35,SINGLE,Applicant,Acacia Breeze,1,350000.0,2,14/2/2025,PENDING

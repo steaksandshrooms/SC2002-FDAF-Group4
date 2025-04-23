@@ -1,0 +1,20 @@
+Timestamp,User Name,NRIC,Role,Action,Details
+2025-04-23 19:17:22,Michael,T8765432F,HDB Manager,PROJECT_CREATED,Project: Dawson Residences, Neighborhood: geylang
+2025-04-23 19:17:55,Daniel,T2109876H,HDB Officer,OFFICER_REGISTRATION,RegistrationId: REG-5134a376, Project: Dawson Residences
+2025-04-23 19:18:58,Michael,T8765432F,HDB Manager,OFFICER_ASSIGNED,Officer: T2109876H, Project: Dawson Residences
+2025-04-23 19:18:58,Michael,T8765432F,HDB Manager,REGISTRATION_STATUS_CHANGED,RegistrationId: REG-5134a376, Status: Approved
+2025-04-23 19:21:08,John,S1234567A,Applicant,ENQUIRY_SUBMITTED,EnquiryId: ENQ-f64e7397, Project: Dawson Residences
+2025-04-24 00:06:17,Michael,T8765432F,HDB Manager,PROJECT_CREATED,Project: Dawson Residences, Neighborhood: Holland
+2025-04-24 00:13:16,Michael,T8765432F,HDB Manager,PROJECT_VISIBILITY_CHANGED,Project: Dawson Residences, Visibility: false -> true
+2025-04-24 00:16:05,Daniel,T2109876H,HDB Officer,OFFICER_REGISTRATION,RegistrationId: REG-7290b272, Project: Dawson Residences
+2025-04-24 00:22:56,Michael,T8765432F,HDB Manager,OFFICER_ASSIGNED,Officer: T2109876H, Project: Dawson Residences
+2025-04-24 00:22:56,Michael,T8765432F,HDB Manager,REGISTRATION_STATUS_CHANGED,RegistrationId: REG-7290b272, Status: Approved
+2025-04-24 00:29:03,John,S1234567A,Applicant,APPLICATION_CREATED,Project: Dawson Residences, Flat Type: 2-Room
+2025-04-24 00:30:12,John,S1234567A,Applicant,WITHDRAWAL_REQUESTED,ApplicationId: APP-2f59de00, Reason: My loan for installments got rejected by the bank.
+2025-04-24 00:32:08,John,S1234567A,Applicant,ENQUIRY_SUBMITTED,EnquiryId: ENQ-326a983c, Project: Dawson Residences
+2025-04-24 00:32:44,John,S1234567A,Applicant,ENQUIRY_UPDATED,EnquiryId: ENQ-326a983c
+2025-04-24 00:33:16,John,S1234567A,Applicant,ENQUIRY_DELETED,EnquiryId: ENQ-326a983c, Project: Dawson Residences
+2025-04-24 00:38:10,Sarah,T7654321B,Applicant,APPLICATION_CREATED,Project: Dawson Residences, Flat Type: 2-Room
+2025-04-24 00:38:28,Sarah,T7654321B,Applicant,ENQUIRY_SUBMITTED,EnquiryId: ENQ-f75a0263, Project: Dawson Residences
+2025-04-24 00:39:51,System,N/A,N/A,ENQUIRY_REPLIED,EnquiryId: ENQ-f75a0263
+2025-04-24 00:41:31,System,N/A,N/A,WITHDRAWAL_APPROVED,ApplicationId: APP-2f59de00, Applicant: S1234567A
