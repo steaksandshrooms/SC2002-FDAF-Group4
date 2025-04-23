@@ -1,6 +1,0 @@
-Timestamp,User Name,NRIC,Role,Action,Details
-2025-04-23 19:17:22,Michael,T8765432F,HDB Manager,PROJECT_CREATED,Project: Dawson Residences, Neighborhood: geylang
-2025-04-23 19:17:55,Daniel,T2109876H,HDB Officer,OFFICER_REGISTRATION,RegistrationId: REG-5134a376, Project: Dawson Residences
-2025-04-23 19:18:58,Michael,T8765432F,HDB Manager,OFFICER_ASSIGNED,Officer: T2109876H, Project: Dawson Residences
-2025-04-23 19:18:58,Michael,T8765432F,HDB Manager,REGISTRATION_STATUS_CHANGED,RegistrationId: REG-5134a376, Status: Approved
-2025-04-23 19:21:08,John,S1234567A,Applicant,ENQUIRY_SUBMITTED,EnquiryId: ENQ-f64e7397, Project: Dawson Residences
